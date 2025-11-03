@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: httpbin-example-com
+  namespace: default
+  labels:
+    app: apis
+spec:
+  parentRefs:
+    - name: gw
+      namespace: ingress-gw
+      # Bind to a specific listener in the parentRef (Gateway) using sectionName field.
+      # sectionName: foo
+  hostnames:
+    - "httpbin.example.com"
+  rules:
+    - matches:  
+      - path:
+          type: PathPrefix
+          value: /
+      backendRefs:
+      # - name: httpbin-2
+      #   namespace: httpbin-2
+      #   port: 8000
+      - group: gloo.solo.io
+        kind: Upstream
+        name: httpbin-2-httpbin-2-8000
+        namespace: gloo-system
