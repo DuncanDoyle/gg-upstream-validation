@@ -15,7 +15,6 @@ gloo:
         deployment:
           replicas: 1
       service:
-        # Set this to different ports, so we can use port 80 on our K8S Gateway API proxy ....
         httpPort: 80
         httpsFirst: true
         httpsPort: 443
@@ -52,21 +51,31 @@ gloo:
         serviceMonitorEnabled: "true"
         podMonitorEnabled: "true"
   discovery:
-    # We don't need the discovery deployment for our Gloo Gateway demo
-    enabled: false
+    #ddoyle: Reproducer 
+    logLevel: info
+    enabled: true
+    udsOptions:
+      enabled: false
+    fdsMode: WHITELIST
+    fdsOptions:
+      # We are not yet using this feature, and enabling it breaks gRPC proto detection
+      graphqlEnabled: fals
   settings:
     # Expose the Control Plane Admin API (port 10010 on Gloo)
     devMode: true
-
-    # Configure some standard descriptors to be used by the rate-limit portion of our tests
-    # This rule states: "if a request has a descriptor with key=generic_key, value=2, apply 1 requests/second rate limit"
-    rateLimit:
-      descriptors:
-        - key: generic_key
-          value: "2"
-          rateLimit:
-            requestsPerUnit: 10
-            unit: MINUTE
+    # writeNamespace: prd3677
+    writeNamespace: gloo-system
+    watchNamespaceSelectors:
+      - matchExpressions:
+          - key: gloo
+            operator: In
+            values:
+              - enabled
+    ratelimitServer:
+      enableXRatelimitHeaders: true
+    disableKubernetesDestinations: true
+    invalidConfigPolicy:
+      replaceInvalidRoutes: true
 observability:
   enabled: false
 
@@ -92,6 +101,10 @@ global:
   glooRbac:
     namespaced: false
     # nameSuffix: gg-demo
+  #ddoyle: Reproducer 
+  glooStats:
+    enabled: true
+    routePrefixRewrite: /stats/prometheus
   extensions:
     # Rate-Limit Configuration
     rateLimit:

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export GLOO_GATEWAY_VERSION="1.20.3"
+# export GLOO_GATEWAY_VERSION="1.19.8"
 # export GLOO_GATEWAY_VERSION="1.18.10"
 # export GLOO_GATEWAY_VERSION="1.17.0"
 export GLOO_GATEWAY_HELM_VALUES_FILE="gloo-gateway-helm-values.yaml"
