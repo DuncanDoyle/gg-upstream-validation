@@ -16,6 +16,14 @@ kubectl create namespace httpbin --dry-run=client -o yaml | kubectl apply -f -
 kubectl create namespace httpbin-2 --dry-run=client -o yaml | kubectl apply -f -
 kubectl create namespace httpbin-3 --dry-run=client -o yaml | kubectl apply -f -
 
+
+#Label namespaces to be watched by Gloo
+kubectl label namespaces gloo-system --overwrite gloo="enabled"
+kubectl label namespaces default --overwrite gloo="enabled"
+kubectl label namespaces httpbin --overwrite gloo="enabled"
+kubectl label namespaces httpbin-2 --overwrite gloo="enabled"
+kubectl label namespaces httpbin-3 --overwrite gloo="enabled"
+
 # Label the default namespace, so the gateway will accept the HTTPRoute from that namespace.
 printf "\nLabel default namespace ...\n"
 kubectl label namespaces default --overwrite shared-gateway-access="true"
@@ -41,14 +49,5 @@ printf "\nDeploy HTTPRoute ...\n"
 kubectl apply -f routes/api-example-com-httproute.yaml
 kubectl apply -f routes/httpbin-example-com-httproute.yaml
 kubectl apply -f routes/developer-example-com-httproute.yaml
-
-# Wait for the upstreams to be deployed before we deploy the VS. If we deploy this too early, it will trigger the webhook.
-sleep 3
-
-# VirtualService
-# NOTE: To reproduce the issue, the invalid upstream MUST be referenced by a VirtualService to trigger the webhook.
-#       Referencing the Upstream from only the HTTPRoute does not trigger the webhook (and I don't really know why not).
-printf "\nDeploy VirtualService ...\n"
-kubectl apply -f virtualservices/httpbin-example-com-vs.yaml
 
 popd
